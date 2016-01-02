@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Latern Game</title>
+		<link rel="stylesheet" type="text/css" href="main.css">
+		<h1 id = "playerName"></h1>
+		<h2 id = "score" ></h2>
+	</head>
+	<body>
+		<canvas id="canvas" style = "border: 1px solid black;"></canvas>
+		<script src="character.js" ></script>
+		<script src="asteroid.js" ></script>
+		<script>
+
+		/**
+		* Created by Yash Patel on 12/18/15
+		*/
+		//import character.js;
+
+		// Variables
+
+
+
+		// getting canvas
+		var canvas=document.getElementById("canvas");
+		var ctx=canvas.getContext("2d");
+
+		//character
+		var player = new Character(name, color);
+		var oldX = player.getX();
+		var oldY = player.getY();
+
+		// Asteroids
+		var asteroid = new Image();
+		var then = new Date().getTime()/1000;
+		var asteroids = new Array();
+
+		// Cross-browser support for requestAnimationFrame
+		var w = window;
+
+		requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+		//all legitcolors are located inside types
+		var types = [ "red", "orange", "yellow", "green",
+		"blue", "purple", "pink", "white", "black"];
+
+		var name = prompt("What is your name?");
+		//document.getElementById("playerName").innerHTML = name; // Use to add Name to HTMl
+		var legitColor = false;
+
+		while (!legitColor){//checks whether legitcolor is entered
+		  var type = prompt("What color ring do you hold? (Choose between black, blue, green, orange, pink, purple, red, white and yellow)");
+		  for (var i = 0; i < types.length; i++){
+		    if (type == types[i])
+		      legitColor = true;
+		  }
+		  if (!legitColor)
+		    alert("Incorrect ring color, try again");
+		}
+		var color = new Image();
+		color.src = type + "Lantern.png";//format of color png
+
+
+
+
+		// Move the character
+		var keysDown = {};
+		addEventListener("keydown", function(e) {
+			keysDown[e.keyCode] = true;
+			//update();
+		  });
+
+		addEventListener("keyup", function(e) {
+			delete keysDown[e.keyCode];
+		});
+
+		function update(){
+			//87 = w; 38 = up arrow key
+			if (87 in keysDown|| 38 in keysDown)
+				player.moveUp();
+			//83 = s; 40 = down arrow key
+			if (83 in keysDown || 40 in keysDown)
+				player.moveDown();
+			if (68 in keysDown ||  39 in keysDown)
+				player.moveRight();
+			if (65 in keysDown ||  37 in keysDown)
+				player.moveLeft();
+
+			var index = 0;
+			asteroids.forEach(function(rock){
+				if(rock.getX() > rock.getWidth())
+					rock.moveLeft();
+				else if (index > -1)
+						asteroids.splice(index, 1);
+				index++;
+			});
+		}
+
+		//allows automatic resizing of canvas based on window size
+
+		window.addEventListener('resize', resizeCanvas);
+		window.addEventListener('load', function(){main()});
+
+		// Start Timer
+		var begin = new Date().getTime()/1000;
+
+		function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      /**
+       * Your drawings need to be inside this function otherwise they will be reset when
+       * you resize the browser window and the canvas goes will be cleared.
+       */
+      //ctx.fillStyle="black";
+      //ctx.fillRect(0, 0, canvas.width, canvas.height);
+      //setUpBoard();
+		}
+		//resizeCanvas();
+
+
+		function drawCharacter(){
+		      ctx.clearRect(oldX, oldY, player.getWidth(), player.getHeight()); // Deletes old character
+		      ctx.drawImage(color,player.getX(),player.getY(), player.getWidth(), player.getHeight()); // Draws new character
+					oldX = player.getX(); // saves old cords
+		      oldY = player.getY();
+		  }
+
+		//drawing all asteroids
+
+		function drawAsteroids(){
+			now = new Date().getTime()/1000;
+			if (now - then > 1){// Draws a new asteroid every second
+				console.log('NOW - Then ' + (now - then));
+				asteroid.src = "asteroid" + Math.floor((Math.random() * 3) + 1) + ".png";
+				var rock = new Asteroid();
+				ctx.drawImage(asteroid, rock.getX(), rock.getY(), rock.getWidth(), rock.getHeight());
+				then = now;
+				asteroids.push(rock);
+			}
+			asteroids.forEach(function(rock){
+				ctx.clearRect(0,0, canvas.width, canvas.height);
+				ctx.drawImage(color,player.getX(),player.getY(), player.getWidth(), player.getHeight());
+				ctx.drawImage(asteroid, rock.getX(), rock.getY(), rock.getWidth(), rock.getHeight());
+				if (((player.getX() <= rock.getX() + rock.getWidth()) && (rock.getX() <= player.getX())) ||
+				((rock.getX() <= player.getX() + player.getWidth()) && (player.getX() + player.getWidth() <= rock.getX() + rock.getWidth())) ||
+			((player.getX() <= rock.getX()) && (rock.getX() + rock.getWidth() <= player.getX() + player.getWidth()))){
+					if (((player.getY() <= rock.getY() + rock.getHeight()) && (rock.getY() <= player.getY())) ||
+					((rock.getY() <= player.getY() + player.getHeight()) && (player.getY() + player.getHeight() <= rock.getY() + rock.getHeight())) ||
+				((player.getY() <= rock.getY()) && (rock.getY() + rock.getHeight() <= player.getY() + player.getHeight()))){
+						console.log("Player x,y: " + player.getX()+ ',' +player.getY());
+						console.log("Rock x,y: " + rock.getX() + ',' + rock.getY());
+						alert("Game Over! " + name + " lasted " + ((new Date().getTime())/1000 - begin).toFixed(3) + " seconds");
+						//var replay = prompt("Do you want to play again? (y/n)");
+						//if (replay == "y")
+							document.location.reload();
+						//else
+						//	return;
+					}
+				}
+			});
+		}
+		function animate()
+		{
+		  drawCharacter();
+
+			drawAsteroids();
+			update();
+			requestAnimationFrame(animate);
+		}
+
+
+		function main()
+		{
+		resizeCanvas();
+		animate();
+		}
+		</script>
+	</body>
+</html>
