@@ -88,7 +88,7 @@
 
 			var index = 0;
 			asteroids.forEach(function(rock){
-				if(rock.getX() > rock.getWidth())
+				if(rock.getX() > 0)
 					rock.moveLeft();
 				else if (index > -1)
 						asteroids.splice(index, 1);
@@ -142,13 +142,13 @@
 				ctx.clearRect(0,0, canvas.width, canvas.height);
 				ctx.drawImage(color,player.getX(),player.getY(), player.getWidth(), player.getHeight());
 				ctx.drawImage(asteroid, rock.getX(), rock.getY(), rock.getWidth(), rock.getHeight());
-				if (((player.getX() <= rock.getX() + rock.getWidth()) && (rock.getX() <= player.getX())) ||
-				((rock.getX() <= player.getX() + player.getWidth()) && (player.getX() + player.getWidth() <= rock.getX() + rock.getWidth())) ||
-			((player.getX() <= rock.getX()) && (rock.getX() + rock.getWidth() <= player.getX() + player.getWidth()))){
-					if (((player.getY() <= rock.getY() + rock.getHeight()) && (rock.getY() <= player.getY())) ||
-					((rock.getY() <= player.getY() + player.getHeight()) && (player.getY() + player.getHeight() <= rock.getY() + rock.getHeight())) ||
-				((player.getY() <= rock.getY()) && (rock.getY() + rock.getHeight() <= player.getY() + player.getHeight()))){
-						console.log("Player x,y: " + player.getX()+ ',' +player.getY());
+				if (((player.getX() <= rock.getX() + rock.getWidth()) && (rock.getX() <= player.getX())) || // left of player inside the asteroid
+				((rock.getX() <= player.getX() + player.getWidth()) && (player.getX() + player.getWidth() <= rock.getX() + rock.getWidth())) || // right of player inside asteroid
+			((player.getX() <= rock.getX()) && (rock.getX() + rock.getWidth() <= player.getX() + player.getWidth()))){ // asteroid inside of player
+					if (((player.getY() <= rock.getY() + rock.getHeight()) && (rock.getY() <= player.getY())) || // top of player inside the asteroid
+					((rock.getY() <= player.getY() + player.getHeight()) && (player.getY() + player.getHeight() <= rock.getY() + rock.getHeight())) || // bottom of player inside of asteroid
+				((player.getY() <= rock.getY()) && (rock.getY() + rock.getHeight() <= player.getY() + player.getHeight()))){ // asteroid inside of player
+						console.log("Player x,y: " + player.getX() + ',' +player.getY());
 						console.log("Rock x,y: " + rock.getX() + ',' + rock.getY());
 						alert("Game Over! " + name + " lasted " + ((new Date().getTime())/1000 - begin).toFixed(3) + " seconds");
 						//var replay = prompt("Do you want to play again? (y/n)");
@@ -160,6 +160,7 @@
 				}
 			});
 		}
+
 		function animate()
 		{
 		  drawCharacter();
